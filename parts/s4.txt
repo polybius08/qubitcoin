@@ -1,0 +1,36 @@
+6d(layer[i] + layer[i + 1]) for i in range(0, len(layer), 2)]
+    return layer[0][::-1].hex()
+
+
+@dataclass
+class Chain:
+    blocks: list[dict] = field(default_factory=list)
+    mempool: list[dict] = field(default_factory=list)
+
+    def height(self) -> int:
+        return len(self.blocks) - 1
+
+    def tip(self) -> dict:
+        return self.blocks[-1]
+
+    def bits(self) -> int:
+        if len(self.blocks) < RETARGET_EVERY or len(self.blocks) % RETARGET_EVERY != 0:
+            return self.tip()["header"]["bits"]
+        span = self.tip()["header"]["time"] - self.blocks[-RETARGET_EVERY]["header"]["time"]
+        span = max(TARGET_SPACING * RETARGET_EVERY // 4, min(span, TARGET_SPACING * RETARGET_EVERY * 4))
+        target = max(1, compact_to_target(self.tip()["header"]["bits"]) * span // (TARGET_SPACING * RETARGET_EVERY))
+        floor = compact_to_target(GENESIS_BITS)
+        return target_to_compact(max(target, floor) if target < floor else target)
+
+    def utxos(self) -> dict:
+        spent, outs = set(), {}
+        for height, block in enumerate(self.blocks):
+            for tx in block["txs"]:
+                txid = txid_of(tx)
+                for inp in tx["inputs"]:
+                    if inp["txid"] != "0" * 64:
+                        spent.add((inp["txid"], inp["vout"]))
+                for n, out in enumerate(tx["outputs"]):
+                    outs[(txid, n)] = {
+                        "value": out["value"], "address": out["address"], "height": height,
+             
