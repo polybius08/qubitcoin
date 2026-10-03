@@ -1,0 +1,62 @@
+S = 200
+CLEANUP_HEIGHT = 51
+VAULT_MIN_DELAY = 2
+RDTS_START = 52
+RDTS_DURATION = 52_416
+SECP256K1_N = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141
+SECP256K1_P = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F
+SECP256K1_G = (
+    55066263022277343669578718895168534326250603453777594175500187360389116729240,
+    32670510020758816978083085130507043184471273380659243275938904335757337482424,
+)
+_B58 = b"123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+
+
+def sha256(data: bytes) -> bytes:
+    return hashlib.sha256(data).digest()
+
+
+def sha256d(data: bytes) -> bytes:
+    return sha256(sha256(data))
+
+
+def hash160(data: bytes) -> bytes:
+    h = hashlib.new("ripemd160")
+    h.update(sha256(data))
+    return h.digest()
+
+
+def dhash_hex(data: bytes) -> str:
+    return sha256d(data)[::-1].hex()
+
+
+def b58encode(raw: bytes) -> str:
+    n = int.from_bytes(raw, "big")
+    out = bytearray()
+    while n:
+        n, r = divmod(n, 58)
+        out.append(_B58[r])
+    pad = 0
+    for b in raw:
+        if b == 0:
+            pad += 1
+        else:
+            break
+    return (b"1" * pad + out[::-1]).decode()
+
+
+def b58decode(text: str) -> bytes:
+    n = 0
+    for ch in text.encode():
+        n = n * 58 + _B58.index(ch)
+    raw = n.to_bytes((n.bit_length() + 7) // 8, "big") if n else b""
+    pad = 0
+    for ch in text:
+        if ch == "1":
+            pad += 1
+        else:
+            break
+    return b"\x00" * pad + raw
+
+
+def checksum(payload: bytes)
