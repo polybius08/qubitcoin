@@ -1,0 +1,9 @@
+Qubitcoin is an unofficial educational peer-to-peer cryptocurrency.
+
+It is not Bitcoin, not affiliated with Bitcoin Core, and not the 2024 Qubitcoin
+(QTC) quantum-proof-of-work network or any Dilithium fork using a similar name.
+
+No premine. No sale. No admin key. Demo difficulty is easy. Do not store value.
+
+Wallet private keys are not included in this repository. Anyone with a wallet.json
+can spend that node's coins.
