@@ -1,0 +1,45 @@
+ght: int) -> int:
+    eras = height // HALVING_INTERVAL
+    return 0 if eras >= 64 else INITIAL_SUBSIDY >> eras
+
+
+def txid_of(tx: dict) -> str:
+    body = {
+        "version": tx["version"],
+        "inputs": [{"txid": i["txid"], "vout": i["vout"], "pubkey": i.get("pubkey", ""), "height": i.get("height", 0), "message": i.get("message", "")} for i in tx["inputs"]],
+        "outputs": tx["outputs"],
+        "locktime": tx["locktime"],
+    }
+    return dhash_hex(json.dumps(body, separators=(",", ":"), sort_keys=True).encode())
+
+
+def sighash(tx: dict) -> bytes:
+    body = {
+        "version": tx["version"],
+        "inputs": [{"txid": i["txid"], "vout": i["vout"]} for i in tx["inputs"]],
+        "outputs": tx["outputs"],
+        "locktime": tx["locktime"],
+    }
+    return sha256(json.dumps(body, separators=(",", ":"), sort_keys=True).encode())
+
+
+def header_bytes(block: dict) -> bytes:
+    h = block["header"]
+    return json.dumps({
+        "version": h["version"], "prev": h["prev"], "merkle": h["merkle"],
+        "time": h["time"], "bits": h["bits"], "nonce": h["nonce"], "magic": MAGIC,
+    }, separators=(",", ":"), sort_keys=True).encode()
+
+
+def block_hash(block: dict) -> str:
+    return dhash_hex(header_bytes(block))
+
+
+def merkle(txids: list[str]) -> str:
+    layer = [bytes.fromhex(t)[::-1] for t in txids] or [b""]
+    if layer == [b""]:
+        return dhash_hex(b"")
+    while len(layer) > 1:
+        if len(layer) % 2:
+            layer.append(layer[-1])
+        layer = [sha25
