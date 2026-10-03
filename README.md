@@ -6,16 +6,26 @@ An unofficial peer-to-peer cryptocurrency. Not Bitcoin. Not the 2024 Qubitcoin (
 
 Educational node software. Demo difficulty is easy. Do not store value.
 
+## Get the full client
+
+The source is stored as compressed parts (GitHub upload size limits). Assemble it once:
+
+```bash
+python3 assemble.py
+```
+
+That writes `qubitcoin.py` (~29 KB).
+
 ## Run
 
 ```bash
+pip install cryptography
+python3 assemble.py
 python3 qubitcoin.py run --datadir node-a --port 19100 --mine
 python3 qubitcoin.py run --datadir node-b --port 19101 --peer 127.0.0.1:19100
 python3 qubitcoin.py status --datadir node-a
 python3 qubitcoin.py upgrades
 ```
-
-Requires Python 3 and the `cryptography` package.
 
 ## Upgrades (Bitcoin 2 style)
 
