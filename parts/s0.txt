@@ -1,0 +1,49 @@
+#!/usr/bin/env python3
+"""
+Qubitcoin — an unofficial peer-to-peer cryptocurrency in the Bitcoin shape.
+
+Not the 2024 Qubitcoin (QTC) qPoW network, and not the Dilithium QubitCoin fork.
+No premine, no sale, no admin key, no claim on those projects.
+
+Not Bitcoin. Not affiliated with Bitcoin Core. No premine, no sale, no admin key.
+UTXO ledger, secp256k1 signatures, SHA-256d proof of work, 21,000,000 cap,
+halving every 210,000 blocks, 120-second target.
+
+This process is a full node: it listens, dials peers, relays transactions,
+mines, and serves the chain. Difficulty starts at the genesis target so a
+new network can be born on ordinary hardware, then retargets. A network is
+only as hard to rewrite as the work its operators have piled on it.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import socket
+import threading
+import time
+from dataclasses import dataclass, field
+from pathlib import Path
+
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import ec, utils
+
+UNIT = 100_000_000
+MAX_SUPPLY = 21_000_000 * UNIT
+HALVING_INTERVAL = 210_000
+INITIAL_SUBSIDY = 50 * UNIT
+TARGET_SPACING = 120
+RETARGET_EVERY = 20
+COINBASE_MATURITY = 2
+VERSION = 1
+MAGIC = "QBIT"
+GENESIS_MESSAGE = "02/Oct/2026 Qubitcoin. Unofficial. Not QTC. No premine. No admin key."
+GENESIS_BITS = 0x1F00FFFF
+ADDR_VERSION = 0x32
+DUST_LIMIT = 546
+MAX_DATA_BYTES = 80
+MAX_OUTPUTS = 100
+MIN_FEE_PER_100B = 1
+POOL_FEE_BP
