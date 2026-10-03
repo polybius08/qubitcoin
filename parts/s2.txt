@@ -1,0 +1,58 @@
+ -> bytes:
+    return sha256d(payload)[:4]
+
+
+def b58check(version: int, payload: bytes) -> str:
+    raw = bytes([version]) + payload
+    return b58encode(raw + checksum(raw))
+
+
+def address_from_pubkey(pubkey: bytes) -> str:
+    return b58check(ADDR_VERSION, hash160(pubkey))
+
+
+def new_key():
+    return ec.generate_private_key(ec.SECP256K1())
+
+
+def pub_bytes(key) -> bytes:
+    return key.public_key().public_bytes(serialization.Encoding.X962, serialization.PublicFormat.CompressedPoint)
+
+
+def load_priv(raw: bytes):
+    return ec.derive_private_key(int.from_bytes(raw, "big"), ec.SECP256K1())
+
+
+def sign(key, digest: bytes) -> bytes:
+    return key.sign(digest, ec.ECDSA(utils.Prehashed(hashes.SHA256())))
+
+
+def verify(pubkey: bytes, digest: bytes, sig: bytes) -> bool:
+    try:
+        ec.EllipticCurvePublicKey.from_encoded_point(ec.SECP256K1(), pubkey).verify(
+            sig, digest, ec.ECDSA(utils.Prehashed(hashes.SHA256()))
+        )
+        return True
+    except Exception:
+        return False
+
+
+def compact_to_target(bits: int) -> int:
+    exp, mant = bits >> 24, bits & 0xFFFFFF
+    if exp <= 3:
+        return mant >> (8 * (3 - exp))
+    return mant << (8 * (exp - 3))
+
+
+def target_to_compact(target: int) -> int:
+    if target <= 0:
+        return 0
+    size = (target.bit_length() + 7) // 8
+    mant = target << (8 * (3 - size)) if size <= 3 else target >> (8 * (size - 3))
+    if mant & 0x800000:
+        mant >>= 8
+        size += 1
+    return (size << 24) | mant
+
+
+def subsidy(hei
