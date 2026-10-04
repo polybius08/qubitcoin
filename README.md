@@ -1,40 +1,50 @@
 # Qubitcoin
 
-An unofficial peer-to-peer cryptocurrency. Not Bitcoin. Not the 2024 Qubitcoin (QTC) quantum-proof-of-work network. Not the Dilithium QubitCoin fork. No premine, no sale, no admin key.
+**Client v1.0.0.** Unofficial peer-to-peer cryptocurrency. Not Bitcoin. Not the 2024 Qubitcoin (QTC) network. No premine, no sale, no admin key.
 
-**Ticker QBIT** (not QTC). Network magic `QBIT`. Cap 21,000,000. Opening subsidy 50. Halving every 210,000 blocks. SHA-256d proof of work. secp256k1 signatures. Two-minute target.
+Ticker **QBIT**. Magic `QBIT`. Cap 21,000,000. Subsidy 50. Halving every 210,000 blocks. SHA-256d. secp256k1. 120s target spacing.
 
-Educational node software. Demo difficulty is easy. Do not store value.
+## Genesis work (v1.0.0)
 
-## Get the full client
+Demo difficulty is **retired**.
 
-The source is stored as compressed parts (GitHub upload size limits). Assemble it once:
+| Constant | Value |
+|----------|--------|
+| `GENESIS_BITS` | `0x1E00FFFF` |
+| Expected hashes / block | ~1.7×10⁷ |
+| ~0.2 MH/s Python SHA-256d | on the order of **1 minute** per block |
+
+Rewriting a long chain costs real time on ordinary hardware. Still far below Bitcoin mainnet; this is a public-test floor, not instant mine.
+
+**Wipe pre-v1.0 datadirs** — they are a different chain.
 
 ```bash
-python3 assemble.py
+python3 qubitcoin.py info
 ```
-
-That writes `qubitcoin.py` (~29 KB).
 
 ## Run
 
 ```bash
 pip install cryptography
-python3 assemble.py
+python3 assemble.py    # if you only have compressed parts/
+
 python3 qubitcoin.py run --datadir node-a --port 19100 --mine
-python3 qubitcoin.py run --datadir node-b --port 19101 --peer 127.0.0.1:19100
+python3 qubitcoin.py run --datadir node-b --port 19101 --seed 127.0.0.1:19100
 python3 qubitcoin.py status --datadir node-a
-python3 qubitcoin.py upgrades
 ```
 
-## Upgrades (Bitcoin 2 style)
+`--seed` / `--peer` take `host:port` (repeatable). `DEFAULT_SEEDS` is empty by default.
 
-- Relay policy: data over 80 bytes and dust rejected
-- Timewarp guard from height 51
-- BIP 110 reduced-data window from height 52 for 52,416 blocks
-- DATUM-style pool split (pool cannot supply a template)
-- Package relay, silent payments, vault clawback
+Mining prints progress every 1M hashes. First genesis often takes ~1 minute.
+
+## What v1.0.0 changed
+
+- Harder genesis (`0x1E00FFFF`)
+- Unlimited nonce search + progress logs
+- `--seed` bootstrap flag
+- `info` command (expected work, seeds)
+- Client version banner `1.0.0`
 
 ## Safety
 
-Wallet private keys (`wallet.json`) are never published. Anyone with a wallet file can spend that node's coins.
+Do not store meaningful value. Keep `wallet.json` private.
